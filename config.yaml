@@ -1,9 +1,15 @@
 # Hyperparameters for training
 model_hp:
   model_id: Qwen/Qwen2.5-VL-3B-Instruct
-  MIN_PIX: 256 
-  MAX_PIX: 1280
+  min_pixels: 256 
+  max_pixels: 1280
+  use_lora: false
+  use_qlora: false
 
+lora_settings:
+  lora_alpha: 16
+  lora_dropout: 0.05
+  rank: 8
 
 training_hp:
   batch_size: 8
@@ -18,9 +24,8 @@ training_hp:
   warmup_steps: 50
   devices: 0
   accelerator: gpu
-  result_path: "qwen25-3b-instruct"
-
-
+  strategy: ddp
+  result_path: qwen2.5-3b-instruct
 
 dataloader: 
   batch_size: 8

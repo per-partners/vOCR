@@ -140,7 +140,6 @@ class SaveCheckpoint(Callback):
     def on_train_end(self, trainer, pl_module):
         checkpoint_path = f"{self.result_path}/latest"
         os.makedirs(checkpoint_path, exist_ok=True)
-
         pl_module.processor.save_pretrained(checkpoint_path)
         pl_module.model.save_pretrained(checkpoint_path)
         print(f"Saved checkpoint to {checkpoint_path}")

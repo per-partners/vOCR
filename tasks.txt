@@ -1,0 +1,6 @@
+#### 
+Tasks:
+     - Add the distributed training args 
+     - Add the Lora and Qlora
+     - Add GRPO and DPO(optioal) 
+     
