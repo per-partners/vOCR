@@ -1,0 +1,11 @@
+# Hyperparameters for training
+Model_HyperParameter:
+  Model_ID: Qwen/Qwen2.5-VL-3B-Instruct
+
+
+Training_HyperParameter:
+  BATCH_SIZE: 8
+  torch_dtype: bfloat16
+  DEVICE: cuda
+  EPOCHS: 10
+
