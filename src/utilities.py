@@ -6,6 +6,8 @@ from lightning.pytorch.callbacks import Callback
 from lightning.pytorch.callbacks.early_stopping import EarlyStopping
 import os
 
+from src import globals_manager
+
 # Callbacks
 early_stopping_callback = EarlyStopping(
     monitor="val_edit_distance", patience=3, verbose=False, mode="min")
@@ -37,8 +39,11 @@ def format_data(image_directory_path, entry, system_message):
     ]
 
 
-def train_collate_fn(batch, processor):
+def train_collate_fn(batch):
     _, _, examples = zip(*batch)
+    processor = globals_manager.processor
+    if processor is None:
+        raise RuntimeError("Processor is not initialized")
 
     texts = [
         processor.apply_chat_template(example, tokenize=False)
@@ -85,10 +90,12 @@ def train_collate_fn(batch, processor):
     return input_ids, attention_mask, pixel_values, image_grid_thw, labels
 
 
-def evaluation_collate_fn(batch, processor):
+def validation_collate_fn(batch):
     _, data, examples = zip(*batch)
     suffixes = [d["suffix"] for d in data]
-
+    processor = globals_manager.processor
+    if processor is None:
+        raise RuntimeError("Processor is not initialized")
     # drop the assistant portion so the model must generate it
     examples = [e[:2] for e in examples]
 

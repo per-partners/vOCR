@@ -1,19 +1,21 @@
-from roboflow import download_dataset
 import json
 import os
+import subprocess
 from typing import Tuple
+
 from PIL import Image
 from qwen_vl_utils import process_vision_info
-from torch.utils.data import Dataset
-from utilities import format_data, evaluation_collate_fn, train_collate_fn
-from torch.utils.data import DataLoader
+from roboflow import download_dataset
+from torch.utils.data import DataLoader, Dataset
 
+from src.utilities import format_data
 
 class JSONLDataset(Dataset):
-    def __init__(self, jsonl_file_path: str, image_directory_path: str):
+    def __init__(self, jsonl_file_path: str, image_directory_path: str, system_message):
         self.jsonl_file_path = jsonl_file_path
         self.image_directory_path = image_directory_path
         self.entries = self._load_entries()
+        self.system_message = system_message
 
     def _load_entries(self):
         entries = []
@@ -32,50 +34,70 @@ class JSONLDataset(Dataset):
         entry = self.entries[idx]
         image_path = os.path.join(self.image_directory_path, entry['image'])
         image = Image.open(image_path)
-        return image, entry, format_data(self.image_directory_path, entry)
+        return image, entry, format_data(self.image_directory_path, entry, self.system_message)
 
 
-def create_dataset(config: dict) -> Tuple:
+def create_dataset(dataset_path, system_message) -> Tuple:
     train_dataset = JSONLDataset(
-        jsonl_file_path=f"{config['dataset_path']}/train/annotations.jsonl",
-        image_directory_path=f"{config['dataset_path']}/train")
+        jsonl_file_path=f"{dataset_path}/train/annotations.jsonl",
+        image_directory_path=f"{dataset_path}/train",
+        system_message=system_message
+    )
 
     valid_dataset = JSONLDataset(
-        jsonl_file_path=f"{config['dataset_path']}/valid/annotations.jsonl",
-        image_directory_path=f"{config['dataset_path']}/valid")
+        jsonl_file_path=f"{dataset_path}/valid/annotations.jsonl",
+        image_directory_path=f"{dataset_path}/valid",
+        system_message=system_message
+    )
 
     test_dataset = JSONLDataset(
-        jsonl_file_path=f"{config['dataset_path']}/test/annotations.jsonl",
-        image_directory_path=f"{config['dataset_path']}/test",
+        jsonl_file_path=f"{dataset_path}/test/annotations.jsonl",
+        image_directory_path=f"{dataset_path}/test",
+        system_message=system_message
     )
     return train_dataset, valid_dataset, test_dataset
 
 
-def download_dataset():
-    dataset = download_dataset("https://app.roboflow.com/roboflow-jvuqo/pallet-load-manifest-json/2", "jsonl")
-    # head_5 = f"!head -n 5 {dataset.location}/train/annotations.jsonl"
-    # os.system(head_5)
+def download_dataset_from_roboflow(dataset_path):
+    download_dataset(
+        dataset_url="https://app.roboflow.com/roboflow-jvuqo/pallet-load-manifest-json/2",
+        location=dataset_path,
+        model_format="jsonl"
+    )
+
+    train_annotations = os.path.join(
+        dataset_path, 'train', 'annotations.jsonl')
+    valid_annotations = os.path.join(
+        dataset_path, 'valid', 'annotations.jsonl')
+    test_annotations = os.path.join(dataset_path, 'test', 'annotations.jsonl')
+
     print("Dataset downloaded successfully!")
-    # add_prompt = f"!sed -i 's/<JSON>/extract data in JSON format/g' {dataset.location}/train/annotations.jsonl
-    #                !sed -i 's/<JSON>/extract data in JSON format/g' {dataset.location}/valid/annotations.jsonl
-                #    !sed -i 's/<JSON>/extract data in JSON format/g' {dataset.location}/test/annotations.jsonl"
-    # os.system(add_prompt)
-    # print("Prompt added successfully!")
-    
-    
+
+    # Add prompt to all splits
+    def add_prompt_to_file(file_path):
+        cmd = f"sed -i 's/<JSON>/extract data in JSON format/g' {file_path}"
+        subprocess.run(cmd, shell=True)
+
+    add_prompt_to_file(train_annotations)
+    add_prompt_to_file(valid_annotations)
+    add_prompt_to_file(test_annotations)
+
+    subprocess.run(f"head -n 5 {train_annotations}", shell=True)
+
+    print("Prompt added successfully!")
+
+
 if __name__ == "__main__":
-    download_dataset()
-    
-    # config = {
-    #     "dataset_path": "data",
-    #     "dataloader": {
-    #         "batch_size": 16,
-    #         "num_workers": 10,
-    #         "shuffle": True
-    #     }
-    # }
-    # train_loader, valid_loader, test_loader = create_dataset(config)
-    # print(train_loader)
-    # print(valid_loader)
-    # print(test_loader)
-    # print("Dataset created successfully!")
+    dataset_path = "./pallet-load-manifest-json-2"
+    if not os.path.exists(dataset_path):
+        print("Downloading Dataset")
+        download_dataset_from_roboflow(dataset_path)
+
+    config = {
+        "dataset_path": "pallet-load-manifest-json-2",
+    }
+    train_loader, valid_loader, test_loader = create_dataset(dataset_path)
+    print("len(train_loader)", len(train_loader))
+    print("len(valid_loader)", len(valid_loader))
+    print("len(test_loader)", len(test_loader))
+    print("Dataset created successfully!")

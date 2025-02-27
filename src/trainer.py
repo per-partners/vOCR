@@ -1,21 +1,22 @@
 import lightning as L
+import torch
 from nltk import edit_distance
 from torch.optim import AdamW
 from torch.utils.data import DataLoader
-from utilities import train_collate_fn, evaluation_collate_fn
+
 from src.dataset import create_dataset
 from src.model import init_model
-import torch
+from src.utilities import validation_collate_fn, train_collate_fn
 
 
 class Qwen2_5_Trainer(L.LightningModule):
-    def __init__(self, config, processor, model):
+    def __init__(self, config, model, processor):
         super().__init__()
         self.config = config
         self.processor = processor
         self.model = model
         self.train_dataset, self.valid_dataset, self.test_dataset = create_dataset(
-            data_dir=config["data_dir"])
+            dataset_path=config["dataset_path"], system_message=config["system_message"])
 
     def training_step(self, batch, batch_idx):
         input_ids, attention_mask, pixel_values, image_grid_thw, labels = batch
@@ -61,13 +62,12 @@ class Qwen2_5_Trainer(L.LightningModule):
 
         score = sum(scores) / len(scores)
         self.log("val_edit_distance", score, prog_bar=True,
-                 logger=True, batch_size=self.config["train_hp"]["batch_size"])
+                 logger=True, batch_size=self.config["training_hp"]["batch_size"])
         return scores
 
     def configure_optimizers(self):
-        optimizer = AdamW(self.model.parameters(),
-                          lr=self.config["train_hp"]["lr"])
-        return optimizer
+        return AdamW(self.model.parameters(),
+                     lr=self.config["training_hp"]["lr"])
 
     # Ignore the loading from these part of the code
     def train_dataloader(self):
@@ -75,19 +75,18 @@ class Qwen2_5_Trainer(L.LightningModule):
                           batch_size=self.config["dataloader"]["batch_size"],
                           collate_fn=train_collate_fn,
                           num_workers=self.config["dataloader"]["num_workers"],
-                          shuffle=self.config["dataloader"]["shuffle"]
-                          )
+                          shuffle=self.config["dataloader"]["shuffle"])
 
     def val_dataloader(self):
         return DataLoader(self.valid_dataset,
                           batch_size=self.config["dataloader"]["batch_size"],
-                          collate_fn=evaluation_collate_fn,
+                          collate_fn=validation_collate_fn,
                           num_workers=self.config["dataloader"]["num_workers"])
 
     def test_dataloader(self):
         return DataLoader(self.test_dataset,
                           batch_size=self.config["dataloader"]["batch_size"],
-                          collate_fn=evaluation_collate_fn,
+                          collate_fn=validation_collate_fn,
                           num_workers=self.config["dataloader"]["num_workers"])
 
 
@@ -114,4 +113,4 @@ if __name__ == "__main__":
         }
     }
     model, processor = init_model(config)
-    module = Qwen2_5_Trainer(config, processor, model)
+    module = Qwen2_5_Trainer(config, model, processor)
