@@ -2,11 +2,10 @@ from roboflow import download_dataset
 import json
 import os
 from typing import Tuple
-
 from PIL import Image
 from qwen_vl_utils import process_vision_info
 from torch.utils.data import Dataset
-from src.utilities import format_data, evaluation_collate_fn, train_collate_fn
+from utilities import format_data, evaluation_collate_fn, train_collate_fn
 from torch.utils.data import DataLoader
 
 
@@ -38,30 +37,30 @@ class JSONLDataset(Dataset):
 
 def create_dataset(config: dict) -> Tuple:
     train_dataset = JSONLDataset(
-        jsonl_file_path=f"{config["dataset_path"]}/train/annotations.jsonl",
-        image_directory_path=f"{config["dataset_path"]}/train")
+        jsonl_file_path=f"{config['dataset_path']}/train/annotations.jsonl",
+        image_directory_path=f"{config['dataset_path']}/train")
 
     valid_dataset = JSONLDataset(
-        jsonl_file_path=f"{config["dataset_path"]}/valid/annotations.jsonl",
-        image_directory_path=f"{config["dataset_path"]}/valid")
+        jsonl_file_path=f"{config['dataset_path']}/valid/annotations.jsonl",
+        image_directory_path=f"{config['dataset_path']}/valid")
 
     test_dataset = JSONLDataset(
-        jsonl_file_path=f"{config["dataset_path"]}/test/annotations.jsonl",
-        image_directory_path=f"{config["dataset_path"]}/test",
+        jsonl_file_path=f"{config['dataset_path']}/test/annotations.jsonl",
+        image_directory_path=f"{config['dataset_path']}/test",
     )
     return train_dataset, valid_dataset, test_dataset
 
 
 def download_dataset():
     dataset = download_dataset("https://app.roboflow.com/roboflow-jvuqo/pallet-load-manifest-json/2", "jsonl")
-    head_5 = f"!head -n 5 {dataset.location}/train/annotations.jsonl"
-    os.system(head_5)
+    # head_5 = f"!head -n 5 {dataset.location}/train/annotations.jsonl"
+    # os.system(head_5)
     print("Dataset downloaded successfully!")
-    add_prompt = f"!sed -i 's/<JSON>/extract data in JSON format/g' {dataset.location}/train/annotations.jsonl
-                   !sed -i 's/<JSON>/extract data in JSON format/g' {dataset.location}/valid/annotations.jsonl
-                   !sed -i 's/<JSON>/extract data in JSON format/g' {dataset.location}/test/annotations.jsonl"
-    os.system(add_prompt)
-    print("Prompt added successfully!")
+    # add_prompt = f"!sed -i 's/<JSON>/extract data in JSON format/g' {dataset.location}/train/annotations.jsonl
+    #                !sed -i 's/<JSON>/extract data in JSON format/g' {dataset.location}/valid/annotations.jsonl
+                #    !sed -i 's/<JSON>/extract data in JSON format/g' {dataset.location}/test/annotations.jsonl"
+    # os.system(add_prompt)
+    # print("Prompt added successfully!")
     
     
 if __name__ == "__main__":
