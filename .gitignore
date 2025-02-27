@@ -176,3 +176,5 @@ cython_debug/
 .pypirc
 
 lightning_logs
+
+qwen2.5-3b-instruct

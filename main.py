@@ -29,6 +29,7 @@ def main():
         log_every_n_steps=training_config["log_every_n_steps"],
         num_nodes=training_config["num_nodes"],
         strategy=training_config["strategy"],
+        logger = training_config["logger"],
         callbacks=[SaveCheckpoint(
             result_path=training_config["result_path"]), early_stopping_callback]
     )
