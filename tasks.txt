@@ -1,6 +1,7 @@
 #### 
 Tasks:
-     - Add the distributed training args 
-     - Add the Lora and Qlora
+     - Add the distributed training args [x]
+     - Add bash scripts to run eveything from setup to training 
+     - Add the Lora and Qlora [X] 
      - Add GRPO and DPO(optioal) 
      

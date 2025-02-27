@@ -39,3 +39,7 @@ system_message: You are a Vision Language Model specialized in extracting struct
 # laod data path
 dataset_path: assets/dataset
 
+test:
+  test_weight_path: 
+  max_new_tokens: 1024
+  label: 

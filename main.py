@@ -1,11 +1,9 @@
 import gc
-import os
 import torch
-import yaml
 import lightning as L
 
 # Load custom modules
-from src.dataset import create_dataset
+# from src.dataset import create_dataset
 from src.model import init_model
 from src.trainer import Qwen2_5_Trainer
 from src.utilities import SaveCheckpoint, load_config, early_stopping_callback
@@ -14,8 +12,10 @@ from src.utilities import SaveCheckpoint, load_config, early_stopping_callback
 def main():
     # Load configuration
     config = load_config("config.yaml")
-    train_dataset, val_dataset, test_dataset = create_dataset(
-        data_dir=config["data_dir"])
+    
+    # train_dataset, val_dataset, test_dataset = create_dataset(
+    #     data_dir=config["data_dir"])
+    
     model, processor = init_model(config)
     model_module = Qwen2_5_Trainer(config, processor, model)
     trainer = L.Trainer(

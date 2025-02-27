@@ -1,3 +1,4 @@
+from roboflow import download_dataset
 import json
 import os
 from typing import Tuple
@@ -51,17 +52,31 @@ def create_dataset(config: dict) -> Tuple:
     return train_dataset, valid_dataset, test_dataset
 
 
+def download_dataset():
+    dataset = download_dataset("https://app.roboflow.com/roboflow-jvuqo/pallet-load-manifest-json/2", "jsonl")
+    head_5 = f"!head -n 5 {dataset.location}/train/annotations.jsonl"
+    os.system(head_5)
+    print("Dataset downloaded successfully!")
+    add_prompt = f"!sed -i 's/<JSON>/extract data in JSON format/g' {dataset.location}/train/annotations.jsonl
+                   !sed -i 's/<JSON>/extract data in JSON format/g' {dataset.location}/valid/annotations.jsonl
+                   !sed -i 's/<JSON>/extract data in JSON format/g' {dataset.location}/test/annotations.jsonl"
+    os.system(add_prompt)
+    print("Prompt added successfully!")
+    
+    
 if __name__ == "__main__":
-    config = {
-        "dataset_path": "data",
-        "dataloader": {
-            "batch_size": 16,
-            "num_workers": 10,
-            "shuffle": True
-        }
-    }
-    train_loader, valid_loader, test_loader = create_dataset(config)
-    print(train_loader)
-    print(valid_loader)
-    print(test_loader)
-    print("Dataset created successfully!")
+    download_dataset()
+    
+    # config = {
+    #     "dataset_path": "data",
+    #     "dataloader": {
+    #         "batch_size": 16,
+    #         "num_workers": 10,
+    #         "shuffle": True
+    #     }
+    # }
+    # train_loader, valid_loader, test_loader = create_dataset(config)
+    # print(train_loader)
+    # print(valid_loader)
+    # print(test_loader)
+    # print("Dataset created successfully!")

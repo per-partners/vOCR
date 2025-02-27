@@ -4,6 +4,8 @@ from torch.optim import AdamW
 from torch.utils.data import DataLoader
 from utilities import train_collate_fn, evaluation_collate_fn
 from src.dataset import create_dataset
+from src.model import init_model
+import torch
 
 
 class Qwen2_5_Trainer(L.LightningModule):
@@ -82,5 +84,34 @@ class Qwen2_5_Trainer(L.LightningModule):
                           collate_fn=evaluation_collate_fn,
                           num_workers=self.config["dataloader"]["num_workers"])
 
+    def test_dataloader(self):
+        return DataLoader(self.test_dataset,
+                          batch_size=self.config["dataloader"]["batch_size"],
+                          collate_fn=evaluation_collate_fn,
+                          num_workers=self.config["dataloader"]["num_workers"])
+
 
 if __name__ == "__main__":
+    config = {
+        "data_dir": "data",
+        "dataloader": {
+            "batch_size": 16,
+            "num_workers": 10,
+            "shuffle": True},
+
+        "training_hp": {
+            "lr": 1e-5,
+            "batch_size": 16},
+
+        "model_hp": {
+            "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
+            "min_pixels": 1,
+            "max_pixels": 1,
+            "use_qlora": False,
+            "use_lora": False,
+            "device": "cuda",
+            "bf16": True,
+        }
+    }
+    model, processor = init_model(config)
+    module = Qwen2_5_Trainer(config, processor, model)
