@@ -1,13 +1,13 @@
-import torch
-
 import lightning as L
+import torch
 from nltk import edit_distance
+from peft import LoraConfig, get_peft_model
 from torch.optim import AdamW
-from utilities import train_collate_fn
-from peft import get_peft_model, LoraConfig
-from transformers import BitsAndBytesConfig
-from transformers import BitsAndBytesConfig
-from transformers import Qwen2_5_VLForConditionalGeneration, Qwen2_5_VLProcessor
+from transformers import (BitsAndBytesConfig,
+                          Qwen2_5_VLForConditionalGeneration,
+                          Qwen2_5_VLProcessor)
+
+from src.utilities import train_collate_fn
 
 
 def init_model(config: dict):
@@ -17,6 +17,7 @@ def init_model(config: dict):
     use_qlora = config["model_hp"].get("use_qlora", False)
     bnb_config = None
     if use_qlora:
+        print("QLORA Activated")
         bnb_config = BitsAndBytesConfig(
             load_in_4bit=True,
             bnb_4bit_use_double_quant=True,
@@ -35,6 +36,7 @@ def init_model(config: dict):
     use_lora = config["model_hp"].get("use_lora", False)
     lora_config = None
     if use_lora:
+        print("LORA Activated")
         # Define the LoraConfig
         lora_config = LoraConfig(
             lora_alpha=config["lora_settings"]["lora_alpha"],
@@ -53,10 +55,6 @@ def init_model(config: dict):
     # Construct Qwen processor
     processor = Qwen2_5_VLProcessor.from_pretrained(
         config["model_hp"]["model_id"], min_pixels=config["model_hp"]["min_pixels"] * 28 * 28, max_pixels=config["model_hp"]["max_pixels"] * 28 * 28)
-
-    # print("=" * 50)
-    # model.print_trainable_parameters()
-    # print("=" * 50)
     return model, processor
 
 
@@ -65,14 +63,53 @@ if __name__ == "__main__":
         "model_hp": {
             "model_id": "Qwen/Qwen2.5-VL-3B-Instruct",
             "min_pixels": 256,
-            "max_pixels": 1280
+            "max_pixels": 1280,
+            "use_lora": True,
+            "use_qlora": True,
         },
-
+        "lora_settings": {
+            "lora_alpha": 16,
+            "lora_dropout": 0.05,
+            "rank": 8,
+        },
         "training_hp": {
+            "batch_size": 8,
+            "bf16": True,
             "device": "cuda",
-            "bf16": True
-        }
+            "max_epochs": 10,
+            "lr": 2e-4,
+            "check_val_every_n_epoch": 2,
+            "gradient_clip_val": 1.0,
+            "accumulate_grad_batches": 8,
+            "num_nodes": 1,
+            "warmup_steps": 50,
+            "devices": 0,
+            "accelerator": "gpu",
+            "strategy": "ddp",
+            "result_path": "qwen2.5-3b-instruct",
+        },
+        "dataloader": {
+            "batch_size": 8,
+            "num_workers": 4,
+            "shuffle": True,
+            "pin_memory": True,
+        },
+        "model": "train",  # possible values: test, resume, train
+        "system_message": (
+            "You are a Vision Language Model specialized in extracting structured data from visual representations of palette manifests. "
+            "Your task is to analyze the provided image of a palette manifest and extract the relevant information into a well-structured JSON format. "
+            "The palette manifest includes details such as item names, quantities, dimensions, weights, and other attributes. "
+            "Focus on identifying key data fields and ensuring the output adheres to the requested JSON structure. "
+            "Provide only the JSON output based on the extracted information. Avoid additional explanations or comments."
+        ),
+        "dataset_path": "assets/dataset",
+        "test": {
+            "test_weight_path": None,
+            "max_new_tokens": 1024,
+            "label": None,
+        },
     }
+
     model, processor = init_model(config)
     print(model)
     print(processor)
