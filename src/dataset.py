@@ -51,7 +51,7 @@ def create_dataset(config: dict) -> Tuple:
     return train_dataset, valid_dataset, test_dataset
 
 
-def download_dataset():
+def download_dataset_rob():
     dataset = download_dataset("https://app.roboflow.com/roboflow-jvuqo/pallet-load-manifest-json/2", "jsonl")
     # head_5 = f"!head -n 5 {dataset.location}/train/annotations.jsonl"
     # os.system(head_5)
@@ -64,7 +64,7 @@ def download_dataset():
     
     
 if __name__ == "__main__":
-    download_dataset()
+    download_dataset_rob()
     
     # config = {
     #     "dataset_path": "data",

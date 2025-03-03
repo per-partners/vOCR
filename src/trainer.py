@@ -63,6 +63,42 @@ class Qwen2_5_Trainer(L.LightningModule):
         self.log("val_edit_distance", score, prog_bar=True,
                  logger=True, batch_size=self.config["train_hp"]["batch_size"])
         return scores
+    
+    
+    def test_step(self, batch, batch_idx, dataset_idx=0):
+        input_ids, attention_mask, pixel_values, image_grid_thw, suffixes = batch
+        generated_ids = self.model.generate(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            pixel_values=pixel_values,
+            image_grid_thw=image_grid_thw,
+            max_new_tokens=1024
+        )
+        generated_ids_trimmed = [
+            out_ids[len(in_ids):]
+            for in_ids, out_ids
+            in zip(input_ids, generated_ids)]
+
+        generated_suffixes = self.processor.batch_decode(
+            generated_ids_trimmed,
+            skip_special_tokens=True,
+            clean_up_tokenization_spaces=False
+        )
+
+        scores = []
+        for generated_suffix, suffix in zip(generated_suffixes, suffixes):
+            score = edit_distance(generated_suffix, suffix)
+            score = score / max(len(generated_suffix), len(suffix))
+            scores.append(score)
+            print("generated_suffix", generated_suffix)
+            print("suffix", suffix)
+            print("score", score)
+
+        score = sum(scores) / len(scores)
+        self.log("test_edit_distance", score, prog_bar=True,
+                 logger=True, batch_size=self.config["train_hp"]["batch_size"])
+        return scores
+    
 
     def configure_optimizers(self):
         optimizer = AdamW(self.model.parameters(),
