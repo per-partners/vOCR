@@ -101,18 +101,21 @@ def duplicate_and_split_dataset(parent_dir, train_size=0.7, seed=42):
                 sample_crop["suffix"][class_name] = [obj["description"]]
                 all_samples.append(sample_crop)
     
+    
+
         with open(f"{os.path.join(dataset_root, split_name)}/annotations.jsonl", "w") as f_out:
             for sample in tqdm(
                 all_samples, desc=f"Creating {split_name} dataset", colour="blue"
             ):
-                # Copy and rename image
-                dst_image = os.path.join(dataset_root, split_name, count)
-                count +=1
+                new_image_name = f"{count:06d}.jpg"  # Saves images as '000001.jpg', '000002.jpg', etc.
+                dst_image = os.path.join(dataset_root, split_name, new_image_name)
                 cv2.imwrite(dst_image, sample["image"])
-                # Write annotation
-                # remove the image object from the dict
+                sample["image_name"] = new_image_name
                 sample.pop("image")
                 f_out.write(json.dumps(sample) + "\n")
+                count += 1
+
+                
 
     # # Split samples
     # train_val_samples, test_samples = train_test_split(
