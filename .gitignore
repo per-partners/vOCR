@@ -53,6 +53,7 @@ coverage.xml
 .pytest_cache/
 cover/
 
+
 # Translations
 *.mo
 *.pot
@@ -176,5 +177,11 @@ cython_debug/
 .pypirc
 
 lightning_logs
-
+*.jpg
+*.png
+*.jpeg
+*.gif
+*.json
+*.jsonl
+*.jpt_digital_
 qwen2.5-3b-instruct
