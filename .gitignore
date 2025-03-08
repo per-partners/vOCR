@@ -183,5 +183,7 @@ lightning_logs
 *.gif
 *.json
 *.jsonl
+*.txt
+*.sqlite
 *.jpt_digital_
 qwen2.5-3b-instruct
