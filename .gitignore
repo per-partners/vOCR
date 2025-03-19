@@ -187,3 +187,4 @@ lightning_logs
 *.sqlite
 *.jpt_digital_
 qwen2.5-3b-instruct
+.qodo
