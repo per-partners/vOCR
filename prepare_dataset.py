@@ -16,8 +16,7 @@ logging.basicConfig(
     handlers=[
         logging.FileHandler("temp/dataset_processing.log"),
         logging.StreamHandler()
-    ]
-)
+    ])
 logger = logging.getLogger(__name__)
 
 
