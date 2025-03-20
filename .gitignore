@@ -5,6 +5,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+/temp
+*.txt
 # C extensions
 *.so
 src/pallet-load-manifest-json-2/
