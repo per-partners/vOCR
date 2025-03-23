@@ -58,12 +58,7 @@ def create_dataset(dataset_path, system_message) -> Tuple:
     return train_dataset, valid_dataset, test_dataset
 
 
-<<<<<<< HEAD
-def download_dataset_rob():
-    dataset = download_dataset("https://app.roboflow.com/roboflow-jvuqo/pallet-load-manifest-json/2", "jsonl")
-    # head_5 = f"!head -n 5 {dataset.location}/train/annotations.jsonl"
-    # os.system(head_5)
-=======
+
 def download_dataset_from_roboflow(dataset_path):
     download_dataset(
         dataset_url="https://app.roboflow.com/roboflow-jvuqo/pallet-load-manifest-json/2",
@@ -77,7 +72,6 @@ def download_dataset_from_roboflow(dataset_path):
         dataset_path, 'valid', 'annotations.jsonl')
     test_annotations = os.path.join(dataset_path, 'test', 'annotations.jsonl')
 
->>>>>>> 7101828b6d296345f6886969668d4a23bbe959db
     print("Dataset downloaded successfully!")
 
     # Add prompt to all splits

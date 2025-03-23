@@ -14,7 +14,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler("temp/dataset_processing.log"),
+        logging.FileHandler("dataset_processing.log"),
         logging.StreamHandler()
     ])
 logger = logging.getLogger(__name__)
@@ -44,6 +44,7 @@ CLASSES = {
     "date": ["date", "Date"],
     "dental symbol": ["dental symbol plus", "dental symbol T"],
     "medical id": ["Medical ID", "medical ID"],
+    'linker':['Linker','linker','LINKER','Link','link']
 }
 
 
@@ -74,7 +75,7 @@ def check_for_valid_claim_id(claim_id: str) -> bool:
     return is_valid
 
 
-def duplicate_and_split_dataset(parent_dir, num_duplicates=50, train_size=0.7, seed=42):
+def duplicate_and_split_dataset(parent_dir, train_size=0.7, seed=42):
     start_time = time.time()
     logger.info(
         f"Starting dataset processing with parameters: train_size={train_size}, seed={seed}")
@@ -105,6 +106,7 @@ def duplicate_and_split_dataset(parent_dir, num_duplicates=50, train_size=0.7, s
 
     # Get the image names list
     image_names = os.listdir(images_dir)
+    
     logger.info(f"Found {len(image_names)} images to process")
 
     # Check for corresponding annotation files
@@ -217,6 +219,11 @@ def duplicate_and_split_dataset(parent_dir, num_duplicates=50, train_size=0.7, s
                         f"Skipping whole image due to 'unknown' class")
                     do_we_need_to_skip_the_whole_image = True
                     break
+                if class_name=='Linker' or class_name=='linker':
+                    logger.debug(
+                        f"Skipping invalid claim ID: {description}")
+                    skipped_objects += 1
+                    continue
 
                 valid_objects += 1
 
@@ -233,7 +240,7 @@ def duplicate_and_split_dataset(parent_dir, num_duplicates=50, train_size=0.7, s
                     f"Added full image {image_name} with {valid_objects} valid objects")
             else:
                 skipped_images += 1
-
+            print(sample)
             # Crop Level - Process each object separately
             crop_count = 0
             for obj in label.get("objects", []):
@@ -285,8 +292,7 @@ def duplicate_and_split_dataset(parent_dir, num_duplicates=50, train_size=0.7, s
                             f"Empty crop for {image_name} with bbox {bbox}")
                         continue
 
-                    crop_name = f"{image_name}_{class_name}_{description}.jpg"
-
+                    crop_name = f"crop_{image_name}_{class_name}_{description}.jpg"
                     sample_crop = {
                         "image_name": crop_name,
                         "image": crop,
@@ -325,7 +331,12 @@ def duplicate_and_split_dataset(parent_dir, num_duplicates=50, train_size=0.7, s
             ):
                 try:
                     # Saves images as '000001.jpg', '000002.jpg', etc.
-                    new_image_name = f"{count:06d}.jpg"
+                    
+                    if 'crop' in sample['image_name']:
+                        new_image_name = f"crop_{count:06d}.jpg"
+                    else:
+                        new_image_name = f"claim_{count:06d}.jpg"
+                        
                     dst_image = os.path.join(
                         dataset_root, split_name, new_image_name)
 
@@ -337,6 +348,7 @@ def duplicate_and_split_dataset(parent_dir, num_duplicates=50, train_size=0.7, s
 
                     # Update sample and write to JSONL
                     sample["image_name"] = new_image_name
+                    print()
                     # Remove image data before JSON serialization
                     sample.pop("image")
                     f_out.write(json.dumps(sample) + "\n")
@@ -357,7 +369,7 @@ def duplicate_and_split_dataset(parent_dir, num_duplicates=50, train_size=0.7, s
 if __name__ == "__main__":
     try:
         logger.info("Starting dataset processing script")
-        parent_dir = "./assets/batch_claims"
+        parent_dir = "sample_test_OCR/"
         duplicate_and_split_dataset(parent_dir)
         logger.info("Dataset processing completed successfully")
     except Exception as e:
