@@ -4,7 +4,7 @@ model_hp:
   min_pixels: 256 
   max_pixels: 1280
   use_lora: true
-  use_qlora: true
+  use_qlora: false
 
 lora_settings:
   lora_alpha: 16
@@ -14,10 +14,10 @@ lora_settings:
 training_hp:
   bf16: true
   device: cuda
-  max_epochs: 1
+  max_epochs: 500
   logger: wandb
   lr: 0.0001
-  check_val_every_n_epoch: 2
+  check_val_every_n_epoch: 10
   gradient_clip_val: 1.0
   accumulate_grad_batches: 8
   num_nodes: 1
@@ -27,11 +27,11 @@ training_hp:
   strategy: ddp
   limit_val_batches: 1
   num_sanity_val_steps: 0
-  log_every_n_steps: 10
+  log_every_n_steps: 1
   result_path: qwen2.5-3b-instruct
 
 dataloader: 
-  batch_size: 
+  batch_size: 2
   num_workers: 4
   shuffle: true
   pin_memory: true
@@ -40,7 +40,7 @@ mode: train # test , resume , train
 system_message: You are a Vision Language Model specialized in extracting structured data from visual representations of palette manifests. Your task is to analyze the provided image of a palette manifest and extract the relevant information into a well-structured JSON format. The palette manifest includes details such as item names, quantities, dimensions, weights, and other attributes. Focus on identifying key data fields and ensuring the output adheres to the requested JSON structure. Provide only the JSON output based on the extracted information. Avoid additional explanations or comments.
 
 # laod data path
-dataset_path: src/pallet-load-manifest-json-2
+dataset_path: tested_claims/processed_dataset
 
 test:
   test_weight_path: 

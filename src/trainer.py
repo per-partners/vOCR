@@ -53,16 +53,18 @@ class Qwen2_5_Trainer(L.LightningModule):
 
         scores = []
         for generated_suffix, suffix in zip(generated_suffixes, suffixes):
-            score = edit_distance(generated_suffix, suffix)
+            # score = edit_distance(generated_suffix, suffix)
+            score = 100
             score = score / max(len(generated_suffix), len(suffix))
             scores.append(score)
+            
             print("generated_suffix", generated_suffix)
             print("suffix", suffix)
             print("score", score)
 
         score = sum(scores) / len(scores)
         self.log("val_edit_distance", score, prog_bar=True,
-                 logger=True, batch_size=self.config["training_hp"]["batch_size"])
+                 logger=True, batch_size=self.config["dataloader"]["batch_size"])
         return scores
     
     

@@ -10,6 +10,7 @@ from torch.utils.data import DataLoader, Dataset
 
 from src.utilities import format_data
 
+
 class JSONLDataset(Dataset):
     def __init__(self, jsonl_file_path: str, image_directory_path: str, system_message):
         self.jsonl_file_path = jsonl_file_path
@@ -58,7 +59,6 @@ def create_dataset(dataset_path, system_message) -> Tuple:
     return train_dataset, valid_dataset, test_dataset
 
 
-
 def download_dataset_from_roboflow(dataset_path):
     download_dataset(
         dataset_url="https://app.roboflow.com/roboflow-jvuqo/pallet-load-manifest-json/2",
@@ -89,23 +89,6 @@ def download_dataset_from_roboflow(dataset_path):
 
 
 if __name__ == "__main__":
-<<<<<<< HEAD
-    download_dataset_rob()
-    
-    # config = {
-    #     "dataset_path": "data",
-    #     "dataloader": {
-    #         "batch_size": 16,
-    #         "num_workers": 10,
-    #         "shuffle": True
-    #     }
-    # }
-    # train_loader, valid_loader, test_loader = create_dataset(config)
-    # print(train_loader)
-    # print(valid_loader)
-    # print(test_loader)
-    # print("Dataset created successfully!")
-=======
     dataset_path = "./pallet-load-manifest-json-2"
     if not os.path.exists(dataset_path):
         print("Downloading Dataset")
@@ -119,4 +102,3 @@ if __name__ == "__main__":
     print("len(valid_loader)", len(valid_loader))
     print("len(test_loader)", len(test_loader))
     print("Dataset created successfully!")
->>>>>>> 7101828b6d296345f6886969668d4a23bbe959db

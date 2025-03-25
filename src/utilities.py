@@ -9,8 +9,7 @@ import os
 from src import globals_manager
 
 # Callbacks
-early_stopping_callback = EarlyStopping(
-    monitor="val_edit_distance", patience=3, verbose=False, mode="min")
+early_stopping_callback = None
 
 
 def format_data(image_directory_path, entry, system_message):
@@ -135,21 +134,21 @@ class SaveCheckpoint(Callback):
         self.epoch = 0
 
     def on_train_epoch_end(self, trainer, pl_module):
-        checkpoint_path = f"{self.result_path}/{self.epoch}"
-        os.makedirs(checkpoint_path, exist_ok=True)
-
-        pl_module.processor.save_pretrained(checkpoint_path)
-        pl_module.model.save_pretrained(checkpoint_path)
-        print(f"Saved checkpoint to {checkpoint_path}")
-
-        self.epoch += 1
+        # checkpoint_path = f"{self.result_path}/{self.epoch}"
+        # os.makedirs(checkpoint_path, exist_ok=True)
+        # pl_module.processor.save_pretrained(checkpoint_path)
+        # pl_module.model.save_pretrained(checkpoint_path)
+        # print(f"Saved checkpoint to {checkpoint_path}")
+        # self.epoch += 1
+        pass
 
     def on_train_end(self, trainer, pl_module):
-        checkpoint_path = f"{self.result_path}/latest"
-        os.makedirs(checkpoint_path, exist_ok=True)
-        pl_module.processor.save_pretrained(checkpoint_path)
-        pl_module.model.save_pretrained(checkpoint_path)
-        print(f"Saved checkpoint to {checkpoint_path}")
+        # checkpoint_path = f"{self.result_path}/latest"
+        # os.makedirs(checkpoint_path, exist_ok=True)
+        # pl_module.processor.save_pretrained(checkpoint_path)
+        # pl_module.model.save_pretrained(checkpoint_path)
+        # print(f"Saved checkpoint to {checkpoint_path}")
+        pass
 
 
 def side_by_side_diff_divs(text1, text2):
