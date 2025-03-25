@@ -10,6 +10,7 @@ from src.trainer import Qwen2_5_Trainer
 from src.utilities import SaveCheckpoint, early_stopping_callback, load_config
 from src import globals_manager
 
+
 def main():
     # Load configuration
     config = load_config("config.yaml")

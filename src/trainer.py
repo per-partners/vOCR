@@ -57,7 +57,7 @@ class Qwen2_5_Trainer(L.LightningModule):
             score = 100
             score = score / max(len(generated_suffix), len(suffix))
             scores.append(score)
-            
+
             print("generated_suffix", generated_suffix)
             print("suffix", suffix)
             print("score", score)
@@ -66,8 +66,7 @@ class Qwen2_5_Trainer(L.LightningModule):
         self.log("val_edit_distance", score, prog_bar=True,
                  logger=True, batch_size=self.config["dataloader"]["batch_size"])
         return scores
-    
-    
+
     def test_step(self, batch, batch_idx, dataset_idx=0):
         input_ids, attention_mask, pixel_values, image_grid_thw, suffixes = batch
         generated_ids = self.model.generate(
@@ -101,7 +100,6 @@ class Qwen2_5_Trainer(L.LightningModule):
         self.log("test_edit_distance", score, prog_bar=True,
                  logger=True, batch_size=self.config["train_hp"]["batch_size"])
         return scores
-    
 
     def configure_optimizers(self):
         return AdamW(self.model.parameters(),

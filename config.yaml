@@ -31,7 +31,7 @@ training_hp:
   result_path: qwen2.5-3b-instruct
 
 dataloader: 
-  batch_size: 2
+  batch_size: 1
   num_workers: 4
   shuffle: true
   pin_memory: true
